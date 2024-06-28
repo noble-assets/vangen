@@ -12,9 +12,9 @@ func generate_package(w io.Writer, domain, docsDomain, pkg string, r repository)
 <html>
 <head>
 <meta charset="utf-8">
-<title>{{.Domain}}/{{.Package}}</title>
-<meta name="go-import" content="{{.Domain}}/{{.Repository.Prefix}} {{.Repository.Type}} {{.Repository.URL}}">
-<meta name="go-source" content="{{.Domain}}/{{.Repository.Prefix}} {{.Repository.SourceURLs.Home}} {{.Repository.SourceURLs.Dir}} {{.Repository.SourceURLs.File}}">
+<title>{{.Domain}}{{.Package}}</title>
+<meta name="go-import" content="{{.Domain}}{{.Repository.Prefix}} {{.Repository.Type}} {{.Repository.URL}}">
+<meta name="go-source" content="{{.Domain}}{{.Repository.Prefix}} {{.Repository.SourceURLs.Home}} {{.Repository.SourceURLs.Dir}} {{.Repository.SourceURLs.File}}">
 <style>
 * { font-family: sans-serif; }
 body { margin-top: 0; }
@@ -25,9 +25,9 @@ ul { margin-top: 16px; margin-bottom: 16px; }
 </head>
 <body>
 <div class="content">
-<h2>{{.Domain}}/{{.Package}}</h2>
-<code>go get {{.Domain}}/{{.Package}}</code>
-<code>import "{{.Domain}}/{{.Package}}"</code>
+<h2>{{.Domain}}{{.Package}}</h2>
+<code>go get {{.Domain}}{{.Package}}</code>
+<code>import "{{.Domain}}{{.Package}}"</code>
 Home: <a href="{{.HomeURL}}">{{.HomeURL}}</a><br/>
 Source: <a href="{{.Repository.URL}}">{{.Repository.URL}}</a><br/>
 {{if .Repository.Subs -}}Sub-packages:<ul>{{end -}}
@@ -42,6 +42,10 @@ Source: <a href="{{.Repository.URL}}">{{.Repository.URL}}</a><br/>
 		return fmt.Errorf("error loading template: %v", err)
 	}
 
+	if pkg != "" {
+		pkg = "/" + pkg
+	}
+
 	var homeURL string
 	if r.Website.URL != "" {
 		homeURL = r.Website.URL
@@ -49,7 +53,10 @@ Source: <a href="{{.Repository.URL}}">{{.Repository.URL}}</a><br/>
 		if docsDomain == "" {
 			docsDomain = "pkg.go.dev"
 		}
-		homeURL = fmt.Sprintf("https://%s/%s/%s", docsDomain, domain, pkg)
+		homeURL = fmt.Sprintf("https://%s/%s", docsDomain, domain)
+		if pkg != "" {
+			homeURL = homeURL + pkg
+		}
 	}
 
 	if strings.HasPrefix(r.URL, "https://github.com") || strings.HasPrefix(r.URL, "https://gitlab.com") {
@@ -60,10 +67,10 @@ Source: <a href="{{.Repository.URL}}">{{.Repository.URL}}</a><br/>
 			r.SourceURLs.Home = r.URL
 		}
 		if r.SourceURLs.Dir == "" {
-			r.SourceURLs.Dir = r.URL + "/tree/master{/dir}"
+			r.SourceURLs.Dir = r.URL + "/tree/main{/dir}"
 		}
 		if r.SourceURLs.File == "" {
-			r.SourceURLs.File = r.URL + "/blob/master{/dir}/{file}#L{line}"
+			r.SourceURLs.File = r.URL + "/blob/main{/dir}/{file}#L{line}"
 		}
 	}
 
